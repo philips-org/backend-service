@@ -1,29 +1,19 @@
-AWSTemplateFormatVersion: '2010-09-09'
-Description: Create EC2 Instance with Docker Installed
-
-Parameters:
-  KeyName:
-    Description: Name of an existing EC2 KeyPair to SSH into the instance
-    Type: AWS::EC2::KeyPair::KeyName
-
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Create EC2 instance for NGINX
 Resources:
-  NginxInstance:
+  WebServerInstance:
     Type: AWS::EC2::Instance
     Properties:
       InstanceType: t2.micro
-      ImageId: ami-0c02fb55956c7d316  # Amazon Linux 2 (for most regions)
-      KeyName: !Ref KeyName
+      ImageId: ami-0c02fb55956c7d316  # Amazon Linux 2 AMI
+      KeyName: my-key-pair
       SecurityGroups:
-        - !Ref InstanceSecurityGroup
-      UserData:
-        Fn::Base64: !Sub |
-          #!/bin/bash
-          yum update -y
-          amazon-linux-extras install docker -y
-          systemctl start docker
-          systemctl enable docker
+        - !Ref WebServerSecurityGroup
+      Tags:
+        - Key: Name
+          Value: WebServer
 
-  InstanceSecurityGroup:
+  WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Enable SSH and HTTP access
@@ -36,14 +26,3 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: 0.0.0.0/0
-
-Outputs:
-  InstanceId:
-    Description: EC2 Instance ID
-    Value: !Ref NginxInstance
-  PublicIP:
-    Description: Public IP of the EC2 Instance
-    Value: !GetAtt NginxInstance.PublicIp
-  InstanceAZ:
-    Description: Availability Zone of the EC2 Instance
-    Value: !GetAtt NginxInstance.AvailabilityZone
