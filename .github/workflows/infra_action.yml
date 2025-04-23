@@ -1,8 +1,6 @@
-name: Deploy EC2 Infrastructure
-
+name: Deploy Infra
 on:
-  workflow_call:
-
+  workflow_dispatch:
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -10,10 +8,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Deploy EC2 via CloudFormation
-        run: |
-          aws cloudformation deploy \
-            --template-file ec2-nginx-stack.yaml \
-            --stack-name nginx-ec2-stack \
-            --parameter-overrides KeyName=${{ secrets.EC2_KEY_NAME }} \
-            --capabilities CAPABILITY_NAMED_IAM
+      - name: Deploy CloudFormation
+        uses: aws-actions/aws-cloudformation-github-deploy@v1
+        with:
+          name: ec2-nginx-stack
+          template: ec2-nginx-stack.yaml
+          capabilities: CAPABILITY_IAM
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_REGION: us-east-1
