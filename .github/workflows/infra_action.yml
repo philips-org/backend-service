@@ -1,0 +1,19 @@
+name: Deploy EC2 Infrastructure
+
+on:
+  workflow_call:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Deploy EC2 via CloudFormation
+        run: |
+          aws cloudformation deploy \
+            --template-file ec2-nginx-stack.yaml \
+            --stack-name nginx-ec2-stack \
+            --parameter-overrides KeyName=${{ secrets.EC2_KEY_NAME }} \
+            --capabilities CAPABILITY_NAMED_IAM
